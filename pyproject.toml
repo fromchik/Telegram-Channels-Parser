@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "telegram-parser-bot"
+version = "0.1.0"
+description = "Telegram bot for parsing channel posts with clean architecture"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "aiogram>=3.18,<4.0",
+  "telethon>=1.36,<2.0",
+  "SQLAlchemy>=2.0,<3.0",
+  "aiosqlite>=0.20,<1.0",
+  "alembic>=1.14,<2.0",
+  "httpx>=0.27,<1.0",
+  "pydantic>=2.7,<3.0",
+  "pydantic-settings>=2.2,<3.0",
+  "structlog>=24.1,<26.0",
+  "python-dateutil>=2.9,<3.0",
+  "tenacity>=9.0,<10.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0,<9.0",
+  "pytest-asyncio>=0.23,<1.0",
+  "anyio>=4.0,<5.0",
+  "ruff>=0.6,<1.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]

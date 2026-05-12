@@ -1,0 +1,79 @@
+from __future__ import annotations
+
+from collections.abc import Sequence
+from typing import Protocol
+
+from app.domain.entities import (
+    Channel,
+    ChannelCollection,
+    ParsedPost,
+    ParseRequest,
+    User,
+)
+
+
+class UserRepository(Protocol):
+    async def get_by_telegram_id(self, telegram_user_id: int) -> User | None: ...
+    async def upsert(self, user: User) -> User: ...
+
+
+class ChannelRepository(Protocol):
+    async def add(self, channel: Channel) -> Channel: ...
+    async def list_for_user(self, owner_user_id: int) -> Sequence[Channel]: ...
+    async def get_by_id(self, owner_user_id: int, channel_id: int) -> Channel | None: ...
+    async def get_by_source(self, owner_user_id: int, normalized_source: str) -> Channel | None: ...
+    async def delete(self, owner_user_id: int, channel_id: int) -> bool: ...
+
+
+class CollectionRepository(Protocol):
+    async def create(self, collection: ChannelCollection) -> ChannelCollection: ...
+    async def list_for_user(self, owner_user_id: int) -> Sequence[ChannelCollection]: ...
+    async def get_by_id(
+        self, owner_user_id: int, collection_id: int
+    ) -> ChannelCollection | None: ...
+    async def delete(self, owner_user_id: int, collection_id: int) -> bool: ...
+    async def add_channel(
+        self, owner_user_id: int, collection_id: int, channel_id: int
+    ) -> None: ...
+    async def remove_channel(
+        self, owner_user_id: int, collection_id: int, channel_id: int
+    ) -> None: ...
+    async def list_channels(self, owner_user_id: int, collection_id: int) -> Sequence[Channel]: ...
+
+
+class ProcessedPostRepository(Protocol):
+    async def is_processed(
+        self, owner_user_id: int, channel_id: int, telegram_message_id: int
+    ) -> bool: ...
+    async def mark_processed(
+        self, owner_user_id: int, channel_id: int, telegram_message_id: int
+    ) -> None: ...
+    async def list_processed_message_ids(
+        self,
+        owner_user_id: int,
+        channel_id: int,
+        telegram_message_ids: Sequence[int],
+    ) -> set[int]: ...
+    async def mark_many_processed(
+        self,
+        owner_user_id: int,
+        channel_id: int,
+        telegram_message_ids: Sequence[int],
+    ) -> None: ...
+
+
+class UnitOfWork(Protocol):
+    users: UserRepository
+    channels: ChannelRepository
+    collections: CollectionRepository
+    processed_posts: ProcessedPostRepository
+
+    async def __aenter__(self) -> UnitOfWork: ...
+    async def __aexit__(self, exc_type, exc, tb) -> None: ...
+    async def commit(self) -> None: ...
+    async def rollback(self) -> None: ...
+
+
+class TelegramSourceGateway(Protocol):
+    async def resolve_channel(self, source: str) -> tuple[str, int | None, int | None]: ...
+    async def fetch_posts(self, source: str, request: ParseRequest) -> Sequence[ParsedPost]: ...
