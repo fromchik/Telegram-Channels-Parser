@@ -53,8 +53,7 @@ class TelethonGateway:
         return ExternalServiceError(
             "Telethon session is not authorized. Generate a valid TELETHON_SESSION_STRING "
             "and restart the bot."
-        )
-
+        ) 
     async def connect(self) -> None:
         await self._client.connect()
         if not await self._client.is_user_authorized():

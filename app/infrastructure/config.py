@@ -61,6 +61,7 @@ class Settings(BaseSettings):
         session_path.parent.mkdir(parents=True, exist_ok=True)
         return session_path.as_posix()
 
+
     @property
     def normalized_media_storage_dir(self) -> str:
         base_dir = Path(__file__).resolve().parents[2]

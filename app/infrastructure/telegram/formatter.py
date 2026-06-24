@@ -62,3 +62,4 @@ class TelegramHtmlFormatter:
         if isinstance(entity, MessageEntityCustomEmoji):
             return escaped_chunk
         return escaped_chunk
+
